@@ -1,17 +1,27 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-// File for PostgreSQL database
+const user = 'postgres';
+const host = 'localhost';
+const database = 'mydb';
+const password = 'password1';
+const port = '5432';
 
-// Connection URI templates:
-// postgresql://host:port/database
-// postgres://user:pass@example.com:5432/dbname
+const sequelize = new Sequelize(database, user, password, {
+  host,
+  port,
+  dialect: 'postgres',
+  logging: false
+});
 
-const sequelize = new Sequelize(`postgresql://localhost:${process.env.PORT}/mydb`);
 
-try {
-  await sequelize.authenticate();
-  console.log('Connection has been established successfully.');
-} catch (error) {
-  console.error('Unable to connect to the database:', error);
+async function testConnection () {
+  try {
+    await sequelize.authenticate();
+    console.log('Connection has been established successfully.');
+  } catch (error) {
+    console.error('Unable to connect to the database:', error);
+  }
 }
+
+testConnection();
