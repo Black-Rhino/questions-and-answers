@@ -8,5 +8,8 @@
   },
   "scripts": {
     "server": "node server.js"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
   }
 }
