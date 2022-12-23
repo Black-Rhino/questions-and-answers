@@ -27,14 +27,24 @@ async function testConnection () {
 testConnection();
 
 const Question = sequelize.define('Question', {
-  product_id: DataTypes.INTEGER,
-  body: DataTypes.STRING,
-  date_written: DataTypes.DATE,
-  asker_name: DataTypes.STRING,
-  asker_email: DataTypes.STRING,
-  reported: DataTypes.STRING(1),
-  helpful: DataTypes.INTEGER
+  product_id: {type: DataTypes.INTEGER, allowNull: false},
+  body: {type: DataTypes.STRING},
+  date_written: {type: DataTypes.DATE},
+  asker_name: {type: DataTypes.STRING},
+  asker_email: {type: DataTypes.STRING},
+  reported: {type: DataTypes.STRING(1)},
+  helpful: {type: DataTypes.INTEGER}
+}, {
+  tableName: 'questions',
 });
+
+
+// async function createQuestionsTable() {
+//   await Question.sync();
+// };
+
+// createQuestionsTable();
+
 
 // PostgreSQL create questions table query
 /* CREATE TABLE questions (
