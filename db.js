@@ -38,7 +38,7 @@ const Question = sequelize.define('Question', {
   helpful: {type: DataTypes.INTEGER}
 }, {
   tableName: 'questions',
-  timestamps: false;
+  timestamps: false
 });
 
 // --- Answers schema --- //
@@ -53,7 +53,7 @@ const Answer = sequelize.define('Answer', {
   helpful: {type: DataTypes.INTEGER}
 }, {
   tableName: 'answers',
-  timestamps: false;
+  timestamps: false
 });
 
 // --- Photos schema --- //
@@ -63,7 +63,7 @@ const Photo = sequelize.define('Photo', {
   url: {type: DataTypes.STRING}
 }, {
   tableName: 'photos',
-  timestamps: false;
+  timestamps: false
 });
 
 module.exports.Question = Question;
