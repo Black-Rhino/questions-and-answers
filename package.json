@@ -9,7 +9,8 @@
   },
   "scripts": {
     "server": "nodemon server.js",
-    "db": "nodemon db.js"
+    "db": "nodemon db.js",
+    "seed": "node --max-old-space-size=2048 seed.js"
   },
   "devDependencies": {
     "eslint": "^8.31.0",
