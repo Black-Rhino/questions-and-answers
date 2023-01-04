@@ -66,6 +66,8 @@ const Photo = sequelize.define('Photo', {
   timestamps: false
 });
 
+// --- Exporting Models --- //
+
 module.exports.Question = Question;
 module.exports.Answer = Answer;
 module.exports.Photo = Photo;
