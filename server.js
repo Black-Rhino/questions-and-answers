@@ -125,9 +125,17 @@ app.get('/qa/questions/:question_id/answers', (req, res) => {
 //// ---- ADD QUESTION ---- ////
 
 app.post('/qa/questions', (req, res) => {
+  console.log('add question params:', req.body);
   async function addQuestion(params) {
     try {
-      await Question.create(params)
+      let maxId = await Question.max('id');
+      console.log('maxId:', maxId);
+      params.id = maxId + 1;
+
+      await Question.create(params, {
+        benchmark: true,
+        logging: console.log
+      })
     } catch (err) {
       console.log('Error adding question to database:', err);
     }
@@ -139,15 +147,19 @@ app.post('/qa/questions', (req, res) => {
 //// ---- ADD ANSWER ---- ////
 
 app.post('/qa/questions/:question_id/answers', (req, res) => {
-  console.log('POSTING AN ANSWER');
-  console.log('req.body answer:', req.body);
   let answerPhotos = req.body.photos;
   let answerParams = req.body;
   delete answerParams.photos;
   async function addAnswer(params) {
     try {
-      console.log('answer params:', answerParams);
-      await Answer.create(params)
+      params.question_id = parseInt(req.params.question_id);
+      let maxId = await Answer.max('id');
+      params.id = maxId + 1;
+
+      await Answer.create(params, {
+        benchmark: true,
+        logging: console.log
+      })
     } catch (err) {
       console.log('Error adding answer to database:', err);
     }
@@ -169,8 +181,10 @@ app.put('/qa/questions/:question_id/helpful', (req, res) => {
 
       await Question.update({helpful: helpfulScore+1}, {
         where: {
-          question_id: question_id
-        }
+          id: question_id
+        },
+        benchmark: true,
+        logging: console.log
       })
     } catch (err) {
       console.log('Error marking question as helpful:', err);
@@ -187,8 +201,10 @@ app.put('/qa/questions/:question_id/report', (req, res) => {
     try {
       await Question.update({reported: '1'}, {
         where: {
-          question_id: question_id
-        }
+          id: question_id
+        },
+        benchmark: true,
+        logging: console.log
       })
     } catch (err) {
       console.log('Error reporting question:', err);
@@ -209,8 +225,10 @@ app.put('/qa/answers/:answer_id/helpful', (req, res) => {
 
       await Answer.update({helpful: helpfulScore+1}, {
         where: {
-          answer_id: answer_id
-        }
+          id: answer_id
+        },
+        benchmark: true,
+        logging: console.log
       })
     } catch (err) {
       console.log('Error marking answer as helpful:', err);
@@ -227,8 +245,10 @@ app.put('/qa/answers/:answer_id/report', (req, res) => {
     try {
       await Answer.update({reported: '1'}, {
         where: {
-          answer_id: answer_id
-        }
+          id: answer_id
+        },
+        benchmark: true,
+        logging: console.log
       })
     } catch (err) {
       console.log('Error reporting answer:', err);
