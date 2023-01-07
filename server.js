@@ -36,7 +36,7 @@ app.get('/', (req, res) => {
   // Question.hasMany(Answer);
   // Answer.belongsTo(Question, { as: 'question_id' });
 
-//// ---- GET QUESTIONS to a product (WIP)---- ////
+//// ---- GET QUESTIONS ---- ////
 
 app.get('/qa/questions/:product_id', (req, res) => {
   let query = Question.findAll({
@@ -55,7 +55,7 @@ app.get('/qa/questions/:product_id', (req, res) => {
   })
 })
 
-//// ---- GET ANSWERS to a question (WIP) ---- ////
+//// ---- GET ANSWERS ---- ////
 
 app.get('/qa/questions/:question_id/answers', (req, res) => {
   let answers = Answer.findAll({
@@ -69,6 +69,26 @@ app.get('/qa/questions/:question_id/answers', (req, res) => {
   })
   .then((questionAnswers) => res.json(questionAnswers))
   .catch(() => res.sendStatus(500))
+})
+
+//// ---- GET PHOTOS ---- ////
+
+app.get('/qa/questions/answers/:answer_id/photos', (req, res) => {
+  console.log('answer_id:', req.params.answer_id);
+  let photosQuery = Photo.findAll({
+    where: {
+      answer_id: req.params.answer_id
+    }
+  })
+  .then((photos) => {
+    let mappedPhotos = photos.map((photo) => photo.dataValues);
+    return mappedPhotos;
+  })
+  .then((answerPhotos) => res.json(answerPhotos))
+  .catch((err) => {
+    console.log('Error getting photos', err)
+    res.sendStatus(500)
+  })
 })
 
 //// ---- ADD QUESTION ---- ////
