@@ -36,98 +36,75 @@ app.get('/', (req, res) => {
   // Question.hasMany(Answer);
   // Answer.belongsTo(Question, { as: 'question_id' });
 
-//// ---- GET QUESTIONS (WIP)---- ////
+//// ---- GET QUESTIONS ---- ////
 
-app.get('/qa/questions', (req, res) => {
+app.get('/qa/questions/:product_id', (req, res) => {
   let query = Question.findAll({
     where: {
-      product_id: 37112
+      product_id: req.params.product_id
     }
   })
   .then((results) => {
-    // console.log('product questions:', results);
     let productQuestions = results.map((question) => question.dataValues);
-    console.log('results from questions query:', productQuestions);
     return productQuestions;
   })
-  .then((questions) => {
-    // get the answers for each question by id and add an answers property to it
-    let questionsAndAnswers = questions.map((question) => {
-      Answer.findAll({
-        where: {
-          question_id: question.id
-        }
-      })
-      // .then(())
-    })
+  .then((productQuestions) => res.json(productQuestions))
+  .catch((err) => {
+    console.log('Error getting questions', err)
+    res.sendStatus(500)
   })
-  .then(() => res.json(productQuestions))
-  .catch((err) => res.sendStatus(500))
 })
 
-//// ---- GET ANSWERS (WIP) ---- ////
+//// ---- GET ANSWERS ---- ////
 
 app.get('/qa/questions/:question_id/answers', (req, res) => {
-  let answersResult;
-  return Answer.findAll({
+  let answers = Answer.findAll({
     where: {
-      question_id: 130461
+      question_id: req.params.question_id
     }
   })
   .then((answers) => {
-    // console.log('answers:', answers);
-    // answers.map((answer) => answer.dataValues);
-    // console.log('from answers query:', answers[0].dataValues);
-    answersResult = answers.map((answer) => answer.dataValues);
-    console.log('answersResult:', answersResult);
-    return answersResult;
+    let mappedAnswers = answers.map((answer) => answer.dataValues);
+    return mappedAnswers;
   })
-  .then((answers) => (
-    // console.log('answers:', answers)
-    // console.log('answers.id:', answers.id)
-    // loop over answers to add each photo array to them as a property
-    answers.map((answer) => {
-      // console.log('answer in map:', answer)
-      let id = answer.id
-      Photo.findAll({
-        attributes: ['id', 'url'],
-        where: {
-          answer_id: id
-        }
-      })
-      .then((photos) => {
-        let photoData = photos.map((photoObject) => {
-          if (photoObject.dataValues) {
-            console.log('[photoObject.dataValues]:', [photoObject.dataValues])
-            return [photoObject.dataValues];
-          } else {
-            return [];
-          }
-        })
-        return photoData;
-      })
-      .then((photoData) => (
-        answer.photos = photoData
-      ))
-      return answer;
-    })
-  ))
-  .then((answersWithPhotos) => {
-    console.log('answersWithPhotos:', answersWithPhotos)
-    // photos.map((photo) => photo.dataValues)
-  })
-  .then(() => console.log('====ungabunga===='))
-  .then((photosData) => answersResult.photos = photosData)
-  .then(() => res.json(answersResult))
+  .then((questionAnswers) => res.json(questionAnswers))
   .catch(() => res.sendStatus(500))
+})
+
+//// ---- GET PHOTOS ---- ////
+
+app.get('/qa/questions/answers/:answer_id/photos', (req, res) => {
+  console.log('answer_id:', req.params.answer_id);
+  let photosQuery = Photo.findAll({
+    where: {
+      answer_id: req.params.answer_id
+    }
+  })
+  .then((photos) => {
+    let mappedPhotos = photos.map((photo) => photo.dataValues);
+    return mappedPhotos;
+  })
+  .then((answerPhotos) => res.json(answerPhotos))
+  .catch((err) => {
+    console.log('Error getting photos', err)
+    res.sendStatus(500)
+  })
 })
 
 //// ---- ADD QUESTION ---- ////
 
 app.post('/qa/questions', (req, res) => {
+  console.log('add question params:', req.body);
   async function addQuestion(params) {
     try {
-      await Question.create(params)
+      let maxId = await Question.max('id');
+      console.log('maxId:', maxId);
+      params.id = maxId + 1;
+
+      await Question.create(params, {
+        benchmark: true,
+        logging: console.log
+      })
     } catch (err) {
       console.log('Error adding question to database:', err);
     }
@@ -139,15 +116,19 @@ app.post('/qa/questions', (req, res) => {
 //// ---- ADD ANSWER ---- ////
 
 app.post('/qa/questions/:question_id/answers', (req, res) => {
-  console.log('POSTING AN ANSWER');
-  console.log('req.body answer:', req.body);
   let answerPhotos = req.body.photos;
   let answerParams = req.body;
   delete answerParams.photos;
   async function addAnswer(params) {
     try {
-      console.log('answer params:', answerParams);
-      await Answer.create(params)
+      params.question_id = parseInt(req.params.question_id);
+      let maxId = await Answer.max('id');
+      params.id = maxId + 1;
+
+      await Answer.create(params, {
+        benchmark: true,
+        logging: console.log
+      })
     } catch (err) {
       console.log('Error adding answer to database:', err);
     }
@@ -169,8 +150,10 @@ app.put('/qa/questions/:question_id/helpful', (req, res) => {
 
       await Question.update({helpful: helpfulScore+1}, {
         where: {
-          question_id: question_id
-        }
+          id: question_id
+        },
+        benchmark: true,
+        logging: console.log
       })
     } catch (err) {
       console.log('Error marking question as helpful:', err);
@@ -187,8 +170,10 @@ app.put('/qa/questions/:question_id/report', (req, res) => {
     try {
       await Question.update({reported: '1'}, {
         where: {
-          question_id: question_id
-        }
+          id: question_id
+        },
+        benchmark: true,
+        logging: console.log
       })
     } catch (err) {
       console.log('Error reporting question:', err);
@@ -209,8 +194,10 @@ app.put('/qa/answers/:answer_id/helpful', (req, res) => {
 
       await Answer.update({helpful: helpfulScore+1}, {
         where: {
-          answer_id: answer_id
-        }
+          id: answer_id
+        },
+        benchmark: true,
+        logging: console.log
       })
     } catch (err) {
       console.log('Error marking answer as helpful:', err);
@@ -227,8 +214,10 @@ app.put('/qa/answers/:answer_id/report', (req, res) => {
     try {
       await Answer.update({reported: '1'}, {
         where: {
-          answer_id: answer_id
-        }
+          id: answer_id
+        },
+        benchmark: true,
+        logging: console.log
       })
     } catch (err) {
       console.log('Error reporting answer:', err);
