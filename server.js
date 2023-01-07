@@ -36,90 +36,80 @@ app.get('/', (req, res) => {
   // Question.hasMany(Answer);
   // Answer.belongsTo(Question, { as: 'question_id' });
 
-//// ---- GET QUESTIONS (WIP)---- ////
+//// ---- GET QUESTIONS to a product (WIP)---- ////
 
-app.get('/qa/questions', (req, res) => {
+app.get('/qa/questions/:product_id', (req, res) => {
   let query = Question.findAll({
     where: {
-      product_id: 37112
+      product_id: req.params.product_id
     }
   })
   .then((results) => {
-    // console.log('product questions:', results);
     let productQuestions = results.map((question) => question.dataValues);
-    console.log('results from questions query:', productQuestions);
     return productQuestions;
   })
-  .then((questions) => {
-    // get the answers for each question by id and add an answers property to it
-    let questionsAndAnswers = questions.map((question) => {
-      Answer.findAll({
-        where: {
-          question_id: question.id
-        }
-      })
-      // .then(())
-    })
+  .then((productQuestions) => res.json(productQuestions))
+  .catch((err) => {
+    console.log('Error getting questions', err)
+    res.sendStatus(500)
   })
-  .then(() => res.json(productQuestions))
-  .catch((err) => res.sendStatus(500))
 })
 
-//// ---- GET ANSWERS (WIP) ---- ////
+//// ---- GET ANSWERS to a question (WIP) ---- ////
 
 app.get('/qa/questions/:question_id/answers', (req, res) => {
-  let answersResult;
-  return Answer.findAll({
-    where: {
-      question_id: 130461
-    }
-  })
-  .then((answers) => {
-    // console.log('answers:', answers);
-    // answers.map((answer) => answer.dataValues);
-    // console.log('from answers query:', answers[0].dataValues);
-    answersResult = answers.map((answer) => answer.dataValues);
-    console.log('answersResult:', answersResult);
-    return answersResult;
-  })
-  .then((answers) => (
-    // console.log('answers:', answers)
-    // console.log('answers.id:', answers.id)
-    // loop over answers to add each photo array to them as a property
-    answers.map((answer) => {
-      // console.log('answer in map:', answer)
-      let id = answer.id
-      Photo.findAll({
-        attributes: ['id', 'url'],
-        where: {
-          answer_id: id
-        }
-      })
-      .then((photos) => {
-        let photoData = photos.map((photoObject) => {
-          if (photoObject.dataValues) {
-            console.log('[photoObject.dataValues]:', [photoObject.dataValues])
-            return [photoObject.dataValues];
-          } else {
-            return [];
-          }
-        })
-        return photoData;
-      })
-      .then((photoData) => (
-        answer.photos = photoData
-      ))
-      return answer;
-    })
-  ))
-  .then((answersWithPhotos) => {
-    console.log('answersWithPhotos:', answersWithPhotos)
-    // photos.map((photo) => photo.dataValues)
-  })
-  .then(() => console.log('====ungabunga===='))
-  .then((photosData) => answersResult.photos = photosData)
-  .then(() => res.json(answersResult))
-  .catch(() => res.sendStatus(500))
+  // let answersResult;
+  // return Answer.findAll({
+  //   where: {
+  //     id: //130461
+  //   }
+  // })
+  // .then((answers) => {
+  //   // console.log('answers:', answers);
+  //   // answers.map((answer) => answer.dataValues);
+  //   // console.log('from answers query:', answers[0].dataValues);
+  //   answersResult = answers.map((answer) => answer.dataValues);
+  //   console.log('answersResult:', answersResult);
+  //   return answersResult;
+  // })
+  // .then((answers) => (
+  //   // console.log('answers:', answers)
+  //   // console.log('answers.id:', answers.id)
+  //   // loop over answers to add each photo array to them as a property
+  //   answers.map((answer) => {
+  //     // console.log('answer in map:', answer)
+  //     let id = answer.id
+  //     Photo.findAll({
+  //       attributes: ['id', 'url'],
+  //       where: {
+  //         answer_id: id
+  //       }
+  //     })
+  //     .then((photos) => {
+  //       let photoData = photos.map((photoObject) => {
+  //         if (photoObject.dataValues) {
+  //           console.log('[photoObject.dataValues]:', [photoObject.dataValues])
+  //           return [photoObject.dataValues];
+  //         } else {
+  //           return [];
+  //         }
+  //       })
+  //       return photoData;
+  //     })
+  //     .then((photoData) => (
+  //       answer.photos = photoData
+  //     ))
+  //     return answer;
+  //   })
+  // ))
+  // .then((answersWithPhotos) => {
+  //   console.log('answersWithPhotos:', answersWithPhotos)
+  //   // photos.map((photo) => photo.dataValues)
+  // })
+  // .then(() => console.log('====ungabunga===='))
+  // .then((photosData) => answersResult.photos = photosData)
+  // .then(() => res.json(answersResult))
+  // .catch(() => res.sendStatus(500))
 })
 
 //// ---- ADD QUESTION ---- ////
